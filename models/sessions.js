@@ -13,12 +13,18 @@ const sessionSchema = new mongoose.Schema({
         required: true
     },
 
+    maximum_participants: {
+        type: Number,
+        required: true
+    },
+
     participants: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
 
     next_payout: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        default: null
     },
 
     defected_participants: {

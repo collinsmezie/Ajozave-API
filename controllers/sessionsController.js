@@ -4,7 +4,7 @@ const Session = require('../models/sessions');
 // Create New Ajo Session
 async function createNewSession(req, res) {
     try {
-        const { session_title, payout_limit, userId } = req.body;
+        const { session_title, payout_limit, maximum_participants, userId } = req.body;
 
         if (!userId) {
             return res.status(400).json({ error: 'userId is required' })
@@ -17,15 +17,17 @@ async function createNewSession(req, res) {
         }
 
         if (user.role !== 'admin') {
-            return res.status(400).json({ error: 'user is not an admin' })
+            return res.status(400).json({ error: 'user is not an admin - cannot create session' })
         }
 
         if (!session_title || !payout_limit) {
             return res.status(400).json({ error: '( session title, payout limit) are required fields' })
         }
         const session = new Session({
-            session_title: session_title,
-            payout_limit: payout_limit
+            session_title,
+            payout_limit,
+            maximum_participants,
+            next_payout: null
         })
 
         await session.save();
@@ -62,6 +64,12 @@ async function joinSession(req, res) {
         const session = await Session.findById(sessionId);
         if (!session) {
             return res.status(400).json({ error: 'Session not found' });
+        }
+
+        if(session.participants.length === session.maximum_participants){
+            return res.status(403).json({message: `${session.session_title} is no longer accepting members`,
+                session
+            })
         }
 
         // Add user id to participants array if not already present
