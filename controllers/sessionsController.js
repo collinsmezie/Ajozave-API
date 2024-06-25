@@ -27,7 +27,7 @@ async function createNewSession(req, res) {
             session_title,
             payout_limit,
             maximum_participants,
-            next_payout: null
+            next_recipient: null
         })
 
         await session.save();
@@ -39,7 +39,6 @@ async function createNewSession(req, res) {
 
 
 //Join a Session 
-
 async function joinSession(req, res) {
     try {
         const { userId, sessionId } = req.body;
@@ -66,27 +65,41 @@ async function joinSession(req, res) {
             return res.status(400).json({ error: 'Session not found' });
         }
 
+
+        // Check if session is fully filled
         if(session.participants.length === session.maximum_participants){
-            return res.status(403).json({message: `${session.session_title} is no longer accepting members`,
+            return res.status(403).json({
+                message: `${session.session_title} is no longer accepting members`,
                 session
             })
+        }
+
+        //check if the session already has a first recipient
+        if (!session.next_recipient) {
+            session.next_recipient = userId;
+            session.participants.push(userId);
+            await session.save();
+            return res.json({
+                message: `User - ${user.full_name} joined ${session.session_title} successfully`,
+                user: user.full_name,
+                session
+            });
+
         }
 
         // Add user id to participants array if not already present
         if (!session.participants.includes(userId)) {
             session.participants.push(userId);
             await session.save();
+            return res.json({
+                message: `User - ${user.full_name} joined ${session.session_title} successfully`,
+                user: user.full_name,
+                session
+            })
 
         } else {
             return res.json({ message: `User ${user.full_name} already joined ${session.session_title}` });
-        }
-
-        // Return success response
-        return res.json({
-            message: `User - ${user.full_name} joined ${session.session_title} successfully`,
-            user: user.full_name,
-            session
-        });
+        }      
 
     } catch (error) {
         console.error('Error in joining session:', error);
