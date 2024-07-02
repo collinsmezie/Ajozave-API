@@ -27,7 +27,8 @@ async function createNewSession(req, res) {
             session_title,
             payout_limit,
             maximum_participants,
-            next_recipient: null
+            next_recipient: null,
+            turns: [...Array(maximum_participants).keys()].map(i => (i + 1).toString())
         })
 
         await session.save();
@@ -75,34 +76,106 @@ async function joinSession(req, res) {
         }
 
         //check if the session already has a first recipient
-        if (!session.next_recipient) {
-            session.next_recipient = userId;
-            session.participants.push(userId);
-            await session.save();
-            return res.json({
-                message: `User - ${user.full_name} joined ${session.session_title} successfully`,
-                user: user.full_name,
-                session
-            });
+        // if (!session.next_recipient) {
+        //     session.next_recipient = userId;
+        //     session.participants.push(userId);
+        //     await session.save();
+        //     return res.json({
+        //         message: `User - ${user.full_name} joined ${session.session_title} successfully`,
+        //         user: user.full_name,
+        //         session
+        //     });
 
-        }
+        // }
 
         // Add user id to participants array if not already present
         if (!session.participants.includes(userId)) {
             session.participants.push(userId);
+            if(!session.next_recipient){
+                session.next_recipient = userId;
+                await session.save();
+                return res.json({
+                    message: `User - ${user.full_name} joined ${session.session_title} successfully,
+                    Please Select Your Preferred Turn: ${session.turns.join(', ')}`,
+                    user: user.full_name,
+                    session
+                })
+            }
+
             await session.save();
             return res.json({
-                message: `User - ${user.full_name} joined ${session.session_title} successfully`,
+                message: `User - ${user.full_name} joined ${session.session_title} successfully -
+                Waiting for a member to pick a turn...`,
                 user: user.full_name,
                 session
             })
 
-        } else {
-            return res.json({ message: `User ${user.full_name} already joined ${session.session_title}` });
-        }      
 
+        } else {
+            return res.json({ message: `User ${user.full_name} already joined ${session.session_title} - 
+            Kindly Check If You're Eligible to Pick A Turn` });
+        }      
+ 
     } catch (error) {
         console.error('Error in joining session:', error);
+        return res.status(500).json({ error: 'Server error' });
+    }
+}
+
+
+// Pick a turn
+async function pickTurn(req, res) {
+    try {
+        const { userId, sessionId, turn } = req.body;
+
+        //validate input
+        if (!userId) {
+            return res.status(400).json({ error: 'userId is required' });
+        }
+
+        if (!turn) {
+            return res.status(400).json({ error: 'turn is required' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(400).json({ error: 'User not found' });
+        }
+
+        const session = await Session.findById(sessionId);
+        if (!session) {
+            return res.status(400).json({ error: 'Session not found' });
+        }
+
+        if (!session.participants.includes(userId)) {
+            return res.status(400).json({ error: `User - ${user.full_name} not found in ${session.session_title}` });
+        }
+
+        //check if turn is within session turns
+        if(!session.turns.includes(turn)){
+            return res.status(400).json({ 
+                error: `Pick a number from ${session.turns.filter(turn =>!turn.includes(userId))}`
+             });
+        }
+
+        //check if the user has already picked a turn
+        if(session.turns.includes(userId)){
+            return res.status(400).json({ error: `User - ${user.full_name} already picked a turn` });
+        }else{
+            //find turn in session turns and replace with user id
+            session.turns[session.turns.indexOf(turn)] = userId;
+            session.participants.splice(session.participants.indexOf(userId), 1);
+            session.next_recipient = session.participants[0];
+            await session.save();
+            return res.json({
+                message: `User - ${user.full_name} picked a turn - ${turn}`,
+                user: user.full_name,
+                session
+            })
+        }
+
+    } catch (error) {
+        console.error('Error in picking turn:', error);
         return res.status(500).json({ error: 'Server error' });
     }
 }
@@ -198,6 +271,7 @@ async function deleteBook(req, res) {
 module.exports = {
     createNewSession,
     joinSession,
+    pickTurn,
     exitSession,
 };
 

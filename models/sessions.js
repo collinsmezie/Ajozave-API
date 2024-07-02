@@ -27,10 +27,18 @@ const sessionSchema = new mongoose.Schema({
         default: null
     },
 
-    defected_participants: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+    // turns field is an array of strings 
+    //and its default value calls to a 
+    //function that populates the array with numbers starting at 1 and ends at the maximum_participants
+
+    turns : {
+        // type: [String],
+        type: [{ type: mongoose.Schema.Types.Mixed }],
+        default: []
     }
 });
+
+
 
 // sessionSchema.methods.create = function (title, payout_limit) {
 //     const session = new Session({
