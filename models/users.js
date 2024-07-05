@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
 
-    full_name: {
+    fullname: {
         type: String,
         required: true
     },
@@ -12,12 +12,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true   
-    },
-
-    role: {
-        type: String,
-        required: true,
-        default: "user",
     }
 
     });

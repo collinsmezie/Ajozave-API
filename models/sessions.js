@@ -3,36 +3,31 @@ const mongoose = require('mongoose');
 
 const sessionSchema = new mongoose.Schema({
 
-    session_title: {
+    sessionTitle: {
         type: String,
         required: true
     },
 
-    payout_limit: {
+    payoutAmount: {
         type: Number,
         required: true
     },
 
-    maximum_participants: {
+    maximumParticipants: {
         type: Number,
         required: true
     },
 
-    participants: [
+    interestedParticipants: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
 
-    next_recipient: {
+    payoutRecipient: {
         type: mongoose.Schema.Types.ObjectId, ref: 'User',
         default: null
     },
 
-    // turns field is an array of strings 
-    //and its default value calls to a 
-    //function that populates the array with numbers starting at 1 and ends at the maximum_participants
-
-    turns : {
-        // type: [String],
+    confirmedMembers : {
         type: [{ type: mongoose.Schema.Types.Mixed }],
         default: []
     }

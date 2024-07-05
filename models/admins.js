@@ -1,22 +1,22 @@
-// const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 
-// const adminSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema({
 
-//     fullname: {
-//         type: String,
-//         required: true
-//     },
+    fullname: {
+        type: String,
+        required: true
+    },
 
-//     email: {
-//         type: String,
-//         required: true,
-//         unique: true   
-//     }
+    email: {
+        type: String,
+        required: true,
+        unique: true   
+    }
 
-//     });
+    });
 
 
-// const User = mongoose.model('ajo_users', userSchema);
+const Admin = mongoose.model('ajo_admins', adminSchema);
 
-// module.exports = User;
+module.exports = Admin;

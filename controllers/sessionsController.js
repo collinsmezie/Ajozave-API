@@ -4,7 +4,7 @@ const Session = require('../models/sessions');
 // Create New Ajo Session
 async function createNewSession(req, res) {
     try {
-        const { session_title, payout_limit, maximum_participants, userId } = req.body;
+        const { sessionTitle, payoutAmount, maximumParticipants, userId } = req.body;
 
         if (!userId) {
             return res.status(400).json({ error: 'userId is required' })
@@ -20,15 +20,15 @@ async function createNewSession(req, res) {
             return res.status(400).json({ error: 'user is not an admin - cannot create session' })
         }
 
-        if (!session_title || !payout_limit) {
+        if (!sessionTitle || !payoutAmount) {
             return res.status(400).json({ error: '( session title, payout limit) are required fields' })
         }
         const session = new Session({
-            session_title,
-            payout_limit,
-            maximum_participants,
-            next_recipient: null,
-            turns: [...Array(maximum_participants).keys()].map(i => i + 1)
+            sessionTitle,
+            payoutAmount,
+            maximumParticipants,
+            nextRecipient: null,
+            confirmedMembers: [...Array(maximumParticipants).keys()].map(i => i + 1)
         })
 
         await session.save();
@@ -68,25 +68,25 @@ async function joinSession(req, res) {
 
 
         // Check if session is fully filled
-        if (session.participants.length === session.maximum_participants) {
+        if (session.interestedParticipants.length === session.maximumParticipants) {
             return res.status(403).json({
-                message: `${session.session_title} is no longer accepting members`,
+                message: `${session.sessionTitle} is no longer accepting members`,
                 session
             })
         }
 
         // Add user id to participants array if not already present
-        if (!session.participants.includes(userId)) {
-            session.participants.push(userId);
+        if (!session.interestedParticipants.includes(userId)) {
+            session.interestedParticipants.push(userId);
             // Check if the first participant is the user
             // console.log("HERE",session.participants[0].toString(), userId)
-            if (session.participants[0].toString() === userId) {
+            if (session.interestedParticipants[0].toString() === userId) {
                 // session.next_recipient = userId;
                 await session.save();
                 return res.json({
-                    message: `User - ${user.full_name} joined ${session.session_title} successfully,
-                    Please Select Your Preferred Turn: ${session.turns.join(', ')}`,
-                    user: user.full_name,
+                    message: `User - ${user.fullname} joined ${session.sessionTitle} successfully,
+                    Please Select Your Preferred Turn: ${session.confirmedMembers.join(', ')}`,
+                    user: user.fullname,
                     session
                 })
             }
@@ -94,23 +94,23 @@ async function joinSession(req, res) {
             await session.save();
 
             // Retrieve next recipient from users db
-            const next_recipient = session.participants[0];
-            const recipient_user = await User.findById(next_recipient);
-            if (!recipient_user) {
+            const recipient = session.interestedParticipants[0];
+            const recipientUser = await User.findById(recipient);
+            if (!recipientUser) {
                 return res.status(400).json({ error: 'Next recipient user not found' });
             }
 
             return res.json({
-                message: `User - ${user.full_name} joined ${session.session_title} successfully -
-                Waiting for ${recipient_user.full_name} to pick a turn...`,
-                user: user.full_name,
+                message: `User - ${user.fullname} joined ${session.sessionTitle} successfully -
+                Waiting for ${recipientUser.fullname} to pick a turn...`,
+                user: user.fullname,
                 session
             })
 
 
         } else {
             return res.json({
-                message: `User ${user.full_name} already joined ${session.session_title} - 
+                message: `User ${user.fullname} already joined ${session.sessionTitle} - 
             Kindly Check If You're Eligible to Pick A Turn` });
         }
 
@@ -147,44 +147,44 @@ async function pickTurn(req, res) {
 
 
         //check if the user has already picked a turn
-        if (session.turns.includes(userId)) {
-            return res.status(400).json({ error: `User - ${user.full_name} already picked a turn` });
+        if (session.confirmedMembers.includes(userId)) {
+            return res.status(400).json({ error: `User - ${user.fullname} already picked a turn` });
         }
 
 
 
         // check if user is eligible to pick a turn
-        if (session.participants[0].toString() === userId) {
+        if (session.interestedParticipants[0].toString() === userId) {
 
             //check if selected turn is within range of available turns
-            if (!session.turns.includes(turn)) {
+            if (!session.confirmedMembers.includes(turn)) {
                 return res.status(400).json({
-                    error: `Pick a number from ${session.turns.filter(item => !isNaN(item))}`
+                    error: `Pick a number from ${session.confirmedMembers.filter(item => !isNaN(item))}`
                 });
             }
 
             //remove user from participants array
-            session.participants.splice(session.participants.indexOf(userId), 1);
+            session.interestedParticipants.splice(session.interestedParticipants.indexOf(userId), 1);
             //find turn in session turns and replace with user id
-            session.turns[session.turns.indexOf(turn)] = userId;
+            session.confirmedMembers[session.confirmedMembers.indexOf(turn)] = userId;
 
             await session.save();
             return res.json({
-                message: `User - ${user.full_name} picked a turn - ${turn}`,
-                user: user.full_name,
+                message: `User - ${user.fullname} picked a turn - ${turn}`,
+                user: user.fullname,
                 session
             })
 
         } else {
             // Retrieve next recipient from users db
-            const next_recipient = session.participants[0];
-            const recipient_user = await User.findById(next_recipient);
-            if (!recipient_user) {
+            const recipient = session.interestedParticipants[0];
+            const recipientUser = await User.findById(recipient);
+            if (!recipientUser) {
                 return res.status(400).json({ error: 'Next recipient user not found' });
             }
 
             return res.json({
-                message: `Waiting for ${recipient_user.full_name} to pick a turn...`,
+                message: `Waiting for ${recipientUser.fullname} to pick a turn...`,
             })
         }
 
@@ -217,17 +217,17 @@ async function exitSession(req, res) {
             return res.status(400).json({ error: 'session not found' })
         }
 
-        if (!session.participants.includes(userId)) {
+        if (!session.interestedParticipants.includes(userId)) {
 
-            return res.status(400).json({ error: `User - ${user.full_name} not found in ${session.session_title}` });
+            return res.status(400).json({ error: `User - ${user.fullname} not found in ${session.sessionTitle}` });
 
         } else {
 
             // Remove user id from participants array
-            session.participants.splice(session.participants.indexOf(userId), 1);
+            session.interestedParticipants.splice(session.interestedParticipants.indexOf(userId), 1);
             await session.save()
             return res.json({
-                message: `User - ${user.full_name} removed from ${session.session_title} successfully`,
+                message: `User - ${user.fullname} removed from ${session.sessionTitle} successfully`,
                 session
             });
         }

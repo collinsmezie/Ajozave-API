@@ -4,13 +4,13 @@ const User = require('../models/users');
 // Controller for creating a new user
 async function createUser(req, res) {
   try {
-    const { full_name, email, role = "user"} = req.body;
-    if(!full_name || !email) {
-      return res.status(400).json({ error: '(full_name, email) are required fields'})
+    const { fullname, email} = req.body;
+    if(!fullname || !email) {
+      return res.status(400).json({ error: '(fullname, email) are required fields'})
     }
-    const user = new User({ full_name, email, role});
+    const user = new User({ fullname, email});
     await user.save();
-    console.log('HERE NOW', req.body);
+    // console.log('HERE NOW', req.body);
     res.status(201).json({ message: "new user created", user});
   } catch (error) {
     res.status(400).json({ error: error.message });

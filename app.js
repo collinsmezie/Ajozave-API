@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit')
 const port = process.env.PORT || 4000;
 const usersRouter = require('./routes/users')
 const sessionsRouter = require('./routes/sessions')
+const adminsRouter = require('./routes/admins')
 
 
 const app = express();
@@ -38,7 +39,7 @@ app.use(bodyParser.json());
 
 // Middleware to handle routes
 // app.use('/api', requiresAuth(), booksRouter, authorsRouter, testbooksRouter);
-app.use('/api', usersRouter, sessionsRouter);
+app.use('/api', usersRouter, adminsRouter, sessionsRouter);
 
 
 app.get('/', (req, res) => {

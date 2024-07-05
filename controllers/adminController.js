@@ -1,17 +1,20 @@
-const Book = require('../models/testbook');
-const Author = require('../models/authors');
+const Admin = require('../models/admins');
 
-
-// Controller for getting all books
-async function getAllBooks(req, res) {
+// Controller for creating a new admin
+async function createAdmin(req, res) {
   try {
-    const books = await Book.find();
-    res.json(books);
+    const { fullname, email} = req.body;
+    if(!fullname || !email) {
+      return res.status(400).json({ error: '(fullname, email) are required fields'})
+    }
+    const admin = new Admin({ fullname, email});
+    await admin.save();
+    res.status(201).json({ message: "new admin created", admin});
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 }
- 
+
 
 // Controller to get all books of an author
 async function getAllBooksByAuthor(req, res) {
@@ -37,6 +40,6 @@ async function getAllBooksByAuthor(req, res) {
 
 
 module.exports = {
-  getAllBooks,
+  createAdmin,
   getAllBooksByAuthor,  
 };
