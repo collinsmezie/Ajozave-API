@@ -8,9 +8,11 @@ const rateLimit = require('express-rate-limit')
 // const auth0Middleware = require('./middlewares/Authentication/auth0');
 // const { requiresAuth } = require('express-openid-connect');
 const port = process.env.PORT || 4000;
+const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users')
 const sessionsRouter = require('./routes/sessions')
 const adminsRouter = require('./routes/admins')
+require('./middlewares/authentication/auth')
 
 
 const app = express();
@@ -36,6 +38,10 @@ app.use(limiter)
 
 // Middleware to parse request body
 app.use(bodyParser.json());
+
+//Middleware for authentication
+app.use('/', authRouter);
+
 
 // Middleware to handle routes
 // app.use('/api', requiresAuth(), booksRouter, authorsRouter, testbooksRouter);

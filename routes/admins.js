@@ -2,8 +2,8 @@ const express = require('express');
 const adminsRouter = express.Router();
 const adminController = require('../controllers/adminController');
 
-// Create new User
-adminsRouter.post('/admins/create', adminController.createAdmin);
+// Create new Admin
+adminsRouter.post('/admins/new', adminController.createAdminAccount);
 // Get all Users
 // usersRouter.get('/users', userController.getAllUsers);
 // // Get User by id
