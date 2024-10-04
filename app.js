@@ -49,14 +49,13 @@ app.use('/api', usersRouter, adminsRouter, sessionsRouter);
 
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the AJO API');
+  res.send('Welcome to the AjoZave API');
 });
 
 // Middleware to handle errors
 app.use((err, req, res, next) => {
-  // logger.error(err.stack);
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).send('Something went wrong on the server.');
 });
 
 
