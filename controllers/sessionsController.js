@@ -1,42 +1,42 @@
 const User = require('../models/users');
 const Session = require('../models/sessions');
+const Admin = require('../models/admins');
 
-// Create New Ajo Session
+/// Create New Ajo Session
 async function createNewSession(req, res) {
     try {
-        const { sessionTitle, payoutAmount, maximumParticipants, userId } = req.body;
+        const { sessionTitle, payoutAmount, maximumParticipants } = req.body;
 
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' })
+        // Use the current authenticated admin from the token
+        const admin = req.user;
+        console.log(admin)
+
+        if (!admin) {
+            return res.status(400).json({ error: 'Admin not found' });
         }
 
-        const user = await User.findById(userId);
-
-        if (!user) {
-            return res.status(400).json({ error: 'user not found' })
-        }
-
-        if (user.role !== 'admin') {
-            return res.status(400).json({ error: 'user is not an admin - cannot create session' })
-        }
-
+        // Validate required fields
         if (!sessionTitle || !payoutAmount) {
-            return res.status(400).json({ error: '( session title, payout limit) are required fields' })
+            return res.status(400).json({ error: 'Session title and payout amount are required fields' });
         }
+
+        // Create a new session
         const session = new Session({
             sessionTitle,
             payoutAmount,
             maximumParticipants,
             nextRecipient: null,
             confirmedMembers: [...Array(maximumParticipants).keys()].map(i => i + 1)
-        })
+        });
 
         await session.save();
+
         res.status(201).json({ message: "New session created", session });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 
 //Join a Session 

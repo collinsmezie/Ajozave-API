@@ -6,72 +6,82 @@ const UserModel = require('../../models/users');
 const AdminModel = require('../../models/admins');
 
 
-// passport.use(
-//     new JWTstrategy(
-//         {
-//             secretOrKey: process.env.JWT_SECRET,
-//             jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-//         },
-//         async (token, done) => {
-//             try {
-//                 // Check if the token is expired
-//                 if (Date.now() >= token.exp * 1000) {
-//                     return done(null, false, { message: 'Token expired' });
-//                 }
 
-//                 // Token is valid, return the user
-//                 return done(null, token.user);
-//             } catch (error) {
-//                 done(error);
-//             }
-//         }
-//     )
+passport.use(
+    new JWTstrategy(
+        {
+            secretOrKey: process.env.JWT_SECRET,
+            jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
+        },
+        async (token, done) => {
+            try {
+				console.log("tOKEN HERE",token)
+                // Check if the token is expired
+                if (Date.now() >= token.exp * 1000) {
+                    return done(null, false, { message: 'Token expired' });
+                }
+
+                // Token is valid, return the user
+                return done(null, token.user);
+            } catch (error) {
+                done(error);
+            }
+        }
+    )
+);
+
+
+
+
+
+
+
+// // User JWT strategy
+// passport.use(
+// 	new JWTstrategy(
+// 		{
+// 			secretOrKey: process.env.JWT_SECRET,
+// 			jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
+// 		},
+// 		async (token, done) => {
+// 			try {
+// 				console.log('Token contents:', token);
+// 				const user = await UserModel.findById(token.user._id);
+// 				if (!user) {
+// 					return done(null, false, { message: 'User not found' });
+// 				}
+// 				return done(null, user);
+// 			} catch (error) {
+// 				done(error);
+// 			}
+// 		}
+// 	)
 // );
 
 
-
-// Admin JWT strategy
-passport.use(
-	new JWTstrategy(
-		{
-			secretOrKey: process.env.ADMIN_JWT_SECRET,
-			jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-		},
-		async (token, done) => {
-			try {
-				const admin = await AdminModel.findById(token.admin._id);
-				if (!admin) {
-					return done(null, false, { message: 'Admin not found' });
-				}
-				return done(null, admin);
-			} catch (error) {
-				done(error);
-			}
-		}
-	)
-);
-
-
-// User JWT strategy
-passport.use(
-	new JWTstrategy(
-		{
-			secretOrKey: process.env.JWT_SECRET,
-			jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-		},
-		async (token, done) => {
-			try {
-				const user = await UserModel.findById(token.user._id);
-				if (!user) {
-					return done(null, false, { message: 'User not found' });
-				}
-				return done(null, user);
-			} catch (error) {
-				done(error);
-			}
-		}
-	)
-);
+// // Admin JWT strategy
+// passport.use(
+// 	new JWTstrategy(
+// 		{
+// 			secretOrKey: process.env.JWT_SECRET,
+// 			jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
+// 		},
+// 		async (token, done) => {
+// 			try {
+// 				console.log('Received token:', token);
+// 				const admin = await AdminModel.findById(token.admin._id);
+// 				if (!admin) {
+// 					// Custom message when admin is not found
+// 					return done(null, false, { message: 'Admin not found. Please provide a valid token.' });
+// 				}
+// 				return done(null, admin);
+// 			} catch (error) {
+// 				// Pass an error message along with the error object
+// 				return done(error, false, { message: 'An error occurred while verifying the token.' });
+// 			}
+// 		}
+// 	)
+// );
 
 
 
@@ -94,7 +104,7 @@ passport.use(
       } catch (error) {
         // Check for the specific MongoDB duplicate key error
         if (error.code === 11000 && error.keyValue && error.keyValue.email) {
-          return done(null, false, { message: 'User already exists with that email' });
+          return done(null, false, { message: 'User already exists with this email' });
         }
         return done(error);
       }

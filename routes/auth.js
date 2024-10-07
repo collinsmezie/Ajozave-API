@@ -57,8 +57,11 @@ authRouter.post('/admin/login', async (req, res, next) => {
 			req.login(user, { session: false }, async (error) => {
 				if (error) return next(error);
 				const body = { _id: user._id, email: user.email };
-				const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
-				return res.json({ token });
+				// const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+				const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '1h' });
+				console.log('Signed token:', token);
+
+				return res.json({message: info.message, token });
 			});
 		} catch (error) {
 			return next(error);

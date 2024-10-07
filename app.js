@@ -12,6 +12,7 @@ const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users')
 const sessionsRouter = require('./routes/sessions')
 const adminsRouter = require('./routes/admins')
+const passport = require('passport');
 require('./middlewares/authentication/auth')
 
 
@@ -38,6 +39,10 @@ app.use(limiter)
 
 // Middleware to parse request body
 app.use(bodyParser.json());
+
+
+// Initialize passport middleware
+app.use(passport.initialize());
 
 //Middleware for authentication
 app.use('/', authRouter);
