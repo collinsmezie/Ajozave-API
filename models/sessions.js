@@ -1,36 +1,78 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 
 const sessionSchema = new mongoose.Schema({
 
-    sessionTitle: {
-        type: String,
+  sessionName: {
+    type: String,
+    required: true
+  },
+
+  contributionAmount: {
+    type: Number,
+    required: true
+  },
+
+
+  duration: {
+    type: Number,
+    required: true
+  },
+
+  numberOfMembers: {
+    type: Number,
+    required: true
+  },
+
+  startDate: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+
+  members: [
+    {
+      memberId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true
-    },
-
-    payoutAmount: {
-        type: Number,
-        required: true
-    },
-
-    maximumParticipants: {
-        type: Number,
-        required: true
-    },
-
-    interestedMembers: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-    ],
-
-    payoutRecipient: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
-        default: null
-    },
-
-    confirmedMembers : {
-        type: [{ type: mongoose.Schema.Types.Mixed }],
-        default: []
+      },
+      hasPaid: {
+        type: Boolean,
+        default: false
+      },
+      paymentDate: {
+        type: Date
+      }
     }
+  ],
+
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'completed'],
+    default: 'inactive'
+  },
+
+  endDate: {
+    type: Date,
+    required: true
+  }
+
+
+  // interestedMembers: [
+  //     { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  // ],
+
+  // payoutRecipient: {
+  //     type: mongoose.Schema.Types.ObjectId, ref: 'User',
+  //     default: null
+  // },
+
+  // confirmedMembers : {
+  //     type: [{ type: mongoose.Schema.Types.Mixed }],
+  //     default: []
+  // }
 });
 
 
