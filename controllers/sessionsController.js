@@ -7,8 +7,6 @@ const Admin = require('../models/admins');
 async function getAllSessions(req, res) {
   try {
 
-    console.log("Inside Get all sessions")
-
     // Retrieve all sessions from the database
     const sessions = await Session.find();
 
@@ -32,7 +30,6 @@ async function createSession(req, res) {
 
     // Use the current authenticated admin from the token
     const admin = req.user;
-    console.log("Adminaa", admin)
 
     if (!admin) {
       return res.status(400).json({ error: 'Admin not found' });
