@@ -22,6 +22,38 @@ async function getAllSessions(req, res) {
   }
 }
 
+/// Get Ajo Session by ID
+async function getSessionById(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Check if the provided ID is a valid MongoDB ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      console.log("ID here",id)
+      return res.status(400).json({ error: "Invalid session ID format" });
+    }
+
+    // Attempt to retrieve the session from the database
+    const session = await Session.findById(id);
+
+    // If no session is found, return a 404 status
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    // Return the session details with a 200 status code
+    res.status(200).json({ message: "Session retrieved successfully", session });
+  } catch (error) {
+    console.error("Error fetching session by ID:", error);
+
+    // Check if error is related to MongoDB or server issues
+    if (error.name === "CastError" && error.kind === "ObjectId") {
+      return res.status(400).json({ error: "Invalid session ID format" });
+    }
+
+    res.status(500).json({ error: "An error occurred while retrieving the session" });
+  }
+}
 
 
 /// Create New Ajo Session
@@ -46,9 +78,12 @@ async function createSession(req, res) {
 
 
     await session.save();
+    console.log("session created")
 
     res.status(201).json({ message: "New session created", session });
   } catch (error) {
+    console.log("Error creating session")
+
     res.status(500).json({ error: error.message });
   }
 }
@@ -258,48 +293,9 @@ async function exitSession(req, res) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-// Update a book using mongoose ORM methods
-async function updateBook(req, res) {
-  try {
-    const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!book) {
-      return res.status(404).json({ error: 'Book not found' });
-    }
-    res.json(book);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
-// Delete a book using mongoose ORM methods
-async function deleteBook(req, res) {
-  try {
-    const book = await Book.findByIdAndDelete(req.params.id);
-    if (!book) {
-      return res.status(404).json({ error: 'Book not found' });
-    }
-    res.json({ message: 'Book deleted successfully' });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
-
-
-
 module.exports = {
   getAllSessions,
+  getSessionById,
   createSession,
   joinSession,
   pickTurn,

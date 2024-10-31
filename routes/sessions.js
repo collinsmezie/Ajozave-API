@@ -48,6 +48,14 @@ sessionsRouter.get(
   sessionsController.getAllSessions
 );
 
+
+sessionsRouter.get(
+  '/sessions/:id',
+  passport.authenticate('jwt', { session: false }),
+  sessionsController.getSessionById
+);
+
+
 sessionsRouter.post(
   '/session/new',
   passport.authenticate('jwt', { session: false }),
