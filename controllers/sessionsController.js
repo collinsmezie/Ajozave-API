@@ -1,6 +1,8 @@
 const User = require('../models/users');
 const Session = require('../models/sessions');
 const Admin = require('../models/admins');
+const mongoose = require('mongoose');
+
 
 
 /// Get All Ajo Sessions
@@ -29,12 +31,22 @@ async function getSessionById(req, res) {
 
     // Check if the provided ID is a valid MongoDB ObjectId
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      console.log("ID here",id)
+      console.log("ID here", id)
       return res.status(400).json({ error: "Invalid session ID format" });
     }
 
     // Attempt to retrieve the session from the database
-    const session = await Session.findById(id);
+    // const session = await Session.findById(id);
+
+    // console.log("look here", mongoose.modelNames());
+
+
+    // Attempt to retrieve the session and populate member information
+    const session = await Session.findById(id).populate({
+      path: "members.member",
+      model: "ajo_users", // The associated "User" model
+      select: "username email" // Choose fields to include in the populated user data
+    });
 
     // If no session is found, return a 404 status
     if (!session) {
@@ -87,6 +99,42 @@ async function createSession(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+
+
+// Add Members to Ajo Session
+async function addMembersToSession(req, res) {
+  try {
+
+    const { id, members } = req.body;
+
+    // Attempt to find and update the session
+    const session = await Session.findById(id);
+
+    // Check if session exists
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    // Update the session's members array with the provided memberIds
+    session.members = members.map(id => ({ member: new mongoose.Types.ObjectId(id) }));
+
+    // Save the updated session document
+    await session.save();
+
+    // Return the updated session
+    res.status(200).json({
+      message: "Members added to session successfully",
+      session,
+    });
+  } catch (error) {
+    console.error("Error adding members to session:", error);
+
+    res.status(500).json({ error: "An error occurred while adding members to the session" });
+  }
+}
+
+
+
 
 
 
@@ -297,6 +345,8 @@ module.exports = {
   getAllSessions,
   getSessionById,
   createSession,
+  addMembersToSession,
+
   joinSession,
   pickTurn,
   exitSession,

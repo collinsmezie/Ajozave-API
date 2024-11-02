@@ -35,6 +35,41 @@ const createSessionSchema = Joi.object({
   });
 
 
+
+// Define the Joi schema for validation
+const addMembersSchema = Joi.object({
+  id: Joi.string().length(24).hex().required().messages({
+    'string.length': 'Session ID must be a 24-character hex string',
+    'string.hex': 'Session ID must contain only hexadecimal characters',
+    'any.required': 'Session ID is required',
+  }),
+  members: Joi.array()
+    .items(Joi.string().length(24).hex().messages({
+      'string.length': 'Each member ID must be a 24-character hex string',
+      'string.hex': 'Each member ID must contain only hexadecimal characters',
+    }))
+    .required()
+    .messages({
+      'any.required': 'Member IDs array is required',
+      'array.base': 'Member IDs must be an array',
+    }),
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const joinSessionSchema = Joi.object({
   sessionId: Joi.string().required().messages({
     'string.empty': 'Session ID is required to join the session.',
@@ -64,6 +99,7 @@ const exitSessionSchema = Joi.object({
 
 module.exports = {
   createSessionSchema,
+  addMembersSchema,
   joinSessionSchema,
   pickTurnSchema,
   exitSessionSchema,

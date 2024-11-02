@@ -33,7 +33,7 @@ const sessionSchema = new mongoose.Schema({
 
   members: [
     {
-      memberId: {
+      member: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true

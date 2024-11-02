@@ -1,32 +1,3 @@
-// const express = require('express');
-// const sessionsRouter = express.Router();
-// const sessionsController = require('../controllers/sessionsController');
-// const passport = require('passport');
-
-// // const {newBookValidatorMiddleware, updatedBookValidatorMiddleware} = require('../middlewares/validators/bookValidator');
-
-
-// sessionsRouter.post('/session/new', passport.authenticate('jwt', {session: false}), sessionsController.createSession);
-
-
-// sessionsRouter.put('/session/join', sessionsController.joinSession);
-// sessionsRouter.put('/session/pick_turn', sessionsController.pickTurn);
-// // booksRouter.get('/books/:id', BookController.getBookById);
-// sessionsRouter.put('/session/exit', sessionsController.exitSession);
-// // booksRouter.delete('/books/:id', BookController.deleteBook);
-
-
-// module.exports = sessionsRouter;
-
-
-
-
-
-
-
-
-
-
 // routes/sessionsRouter.js
 
 const express = require('express');
@@ -36,6 +7,8 @@ const passport = require('passport');
 const validateRequest = require('../middlewares/validateRequest');
 const {
   createSessionSchema,
+  sessionIdSchema,
+  addMembersSchema,
   joinSessionSchema,
   pickTurnSchema,
   exitSessionSchema,
@@ -57,11 +30,24 @@ sessionsRouter.get(
 
 
 sessionsRouter.post(
-  '/session/new',
+  '/sessions/new',
   passport.authenticate('jwt', { session: false }),
   validateRequest(createSessionSchema),
   sessionsController.createSession
 );
+
+sessionsRouter.put(
+  '/sessions/add-members',
+  passport.authenticate('jwt', { session: false }),
+  // validateRequest(sessionIdSchema, 'params'),
+  validateRequest(addMembersSchema),
+  sessionsController.addMembersToSession
+);
+
+
+
+
+
 
 
 

@@ -31,13 +31,11 @@ authRouter.post('/admin/signup', (req, res, next) => {
 });
 
 
-// User Sign Up
-authRouter.post('/user/signup', passport.authenticate('user-signup', { session: false }), async (req, res, next) => {
-	res.json({
-		message: 'User Signup successful',
-		user: req.user
-	});
-});
+
+
+
+
+
 
 
 
@@ -69,6 +67,14 @@ authRouter.post('/admin/login', async (req, res, next) => {
 	})(req, res, next);
 });
 
+
+// User Sign Up
+authRouter.post('/user/signup', passport.authenticate('user-signup', { session: false }), async (req, res, next) => {
+	res.json({
+		message: 'User Signup successful',
+		user: req.user
+	});
+});
 
 
 
