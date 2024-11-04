@@ -35,17 +35,11 @@ async function getSessionById(req, res) {
       return res.status(400).json({ error: "Invalid session ID format" });
     }
 
-    // Attempt to retrieve the session from the database
-    // const session = await Session.findById(id);
-
-    // console.log("look here", mongoose.modelNames());
-
-
     // Attempt to retrieve the session and populate member information
     const session = await Session.findById(id).populate({
       path: "members.member",
-      model: "ajo_users", // The associated "User" model
-      select: "username email" // Choose fields to include in the populated user data
+      model: "ajo_users",
+      select: "username email"
     });
 
     // If no session is found, return a 404 status
@@ -132,6 +126,45 @@ async function addMembersToSession(req, res) {
     res.status(500).json({ error: "An error occurred while adding members to the session" });
   }
 }
+
+
+// Delete Member from Ajo Session
+async function deleteMemberFromSession(req, res) {
+  try {
+    const { sessionId, memberId } = req.params;
+
+    // Attempt to find the session by ID
+    const session = await Session.findById(sessionId);
+
+    // Check if the session exists
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    // Filter out the member from the session's members array
+    const memberExists = session.members.some((member) => member.member.toString() === memberId);
+    
+    if (!memberExists) {
+
+      return res.status(404).json({ error: "Member not found in session" });
+    }
+
+    session.members = session.members.filter((member) => member.member.toString() !== memberId);
+
+    // Save the updated session document
+    await session.save();
+
+    // Return the updated session
+    res.status(200).json({
+      message: "Member removed from session successfully",
+      session,
+    });
+  } catch (error) {
+    console.error("Error removing member from session:", error);
+    res.status(500).json({ error: "An error occurred while removing the member from the session" });
+  }
+}
+
 
 
 
@@ -346,6 +379,7 @@ module.exports = {
   getSessionById,
   createSession,
   addMembersToSession,
+  deleteMemberFromSession,
 
   joinSession,
   pickTurn,

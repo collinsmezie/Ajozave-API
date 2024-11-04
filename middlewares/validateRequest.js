@@ -21,6 +21,7 @@ const validateRequest = (schema, source = 'body') => (req, res, next) => {
   const { error } = schema.validate(dataToValidate, { abortEarly: false });
   if (error) {
     console.log("Error inside validate function", error.message);
+    console.log("See req",req.params)
     return res.status(400).json({
       error: error.details.map((err) => err.message),
     });

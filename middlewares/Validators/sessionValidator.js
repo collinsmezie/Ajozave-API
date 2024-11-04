@@ -56,6 +56,20 @@ const addMembersSchema = Joi.object({
 });
 
 
+// Define the Joi schema for memberId validation
+const deleteMemberSchema = Joi.object({
+  memberId: Joi.string().length(24).hex().required().messages({
+    'string.length': 'Member ID must be a 24-character hex string',
+    'string.hex': 'Member ID must contain only hexadecimal characters',
+    'any.required': 'Member ID is required',
+  }),
+  sessionId: Joi.string().length(24).hex().required().messages({
+    'string.length': 'Session ID must be a 24-character hex string',
+    'string.hex': 'Session ID must contain only hexadecimal characters',
+    'any.required': 'Session ID is required',
+  }),
+});
+
 
 
 
@@ -100,6 +114,7 @@ const exitSessionSchema = Joi.object({
 module.exports = {
   createSessionSchema,
   addMembersSchema,
+  deleteMemberSchema,
   joinSessionSchema,
   pickTurnSchema,
   exitSessionSchema,

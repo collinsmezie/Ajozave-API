@@ -7,8 +7,8 @@ const passport = require('passport');
 const validateRequest = require('../middlewares/validateRequest');
 const {
   createSessionSchema,
-  sessionIdSchema,
   addMembersSchema,
+  deleteMemberSchema,
   joinSessionSchema,
   pickTurnSchema,
   exitSessionSchema,
@@ -42,6 +42,15 @@ sessionsRouter.put(
   // validateRequest(sessionIdSchema, 'params'),
   validateRequest(addMembersSchema),
   sessionsController.addMembersToSession
+);
+
+
+
+sessionsRouter.delete(
+  '/sessions/:sessionId/members/:memberId',
+  passport.authenticate('jwt', { session: false }),
+  validateRequest(deleteMemberSchema, 'params'),
+  sessionsController.deleteMemberFromSession
 );
 
 
