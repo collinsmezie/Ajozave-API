@@ -29,12 +29,6 @@ async function getSessionById(req, res) {
   try {
     const { id } = req.params;
 
-    // Check if the provided ID is a valid MongoDB ObjectId
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      console.log("ID here", id)
-      return res.status(400).json({ error: "Invalid session ID format" });
-    }
-
     // Attempt to retrieve the session and populate member information
     const session = await Session.findById(id).populate({
       path: "members.member",

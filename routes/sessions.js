@@ -23,7 +23,7 @@ sessionsRouter.get(
 
 
 sessionsRouter.get(
-  '/sessions/:id',
+  '/sessions/:sessionId',
   passport.authenticate('jwt', { session: false }),
   sessionsController.getSessionById
 );
