@@ -29,8 +29,6 @@ async function getSessionById(req, res) {
   try {
     const { sessionId } = req.params;
 
-
-    console.log("Here now", req.params)
     // Attempt to retrieve the session and populate member information
     const session = await Session.findById(sessionId).populate({
       path: "members.member",
@@ -94,10 +92,9 @@ async function createSession(req, res) {
 // Add Members to Ajo Session
 async function addMembersToSession(req, res) {
   try {
-
     const { id, members } = req.body;
 
-    // Attempt to find and update the session
+    // Find the session by ID
     const session = await Session.findById(id);
 
     // Check if session exists
@@ -105,8 +102,24 @@ async function addMembersToSession(req, res) {
       return res.status(404).json({ error: "Session not found" });
     }
 
-    // Update the session's members array with the provided memberIds
-    session.members = members.map(id => ({ member: new mongoose.Types.ObjectId(id) }));
+    // Retrieve current members
+    const existingMemberIds = session.members.map(obj => obj.member.toString());
+    const incomingMemberIds = members.map(memberId => memberId.toString());
+
+    // Create a Set to combine and remove duplicates
+    const uniqueMemberIds = new Set([...existingMemberIds, ...incomingMemberIds]);
+
+    // Check if the combined members exceed the session capacity
+    if (uniqueMemberIds.size > session.numberOfMembers) {
+      return res.status(400).json({
+        error: `Adding these members exceeds the session capacity of ${session.numberOfMembers} members set by you`,
+      });
+    }
+
+    // Update session's members with unique member IDs
+    session.members = Array.from(uniqueMemberIds).map(memberId => ({
+      member: new mongoose.Types.ObjectId(memberId),
+    }));
 
     // Save the updated session document
     await session.save();
@@ -118,7 +131,6 @@ async function addMembersToSession(req, res) {
     });
   } catch (error) {
     console.error("Error adding members to session:", error);
-
     res.status(500).json({ error: "An error occurred while adding members to the session" });
   }
 }
@@ -138,14 +150,14 @@ async function deleteMemberFromSession(req, res) {
     }
 
     // Filter out the member from the session's members array
-    const memberExists = session.members.some((member) => member.member.toString() === memberId);
+    const memberExists = session.members.some((obj) => obj.member.toString() === memberId);
     
     if (!memberExists) {
 
       return res.status(404).json({ error: "Member not found in session" });
     }
 
-    session.members = session.members.filter((member) => member.member.toString() !== memberId);
+    session.members = session.members.filter((obj) => obj.member.toString() !== memberId);
 
     // Save the updated session document
     await session.save();
