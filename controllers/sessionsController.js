@@ -27,10 +27,12 @@ async function getAllSessions(req, res) {
 /// Get Ajo Session by ID
 async function getSessionById(req, res) {
   try {
-    const { id } = req.params;
+    const { sessionId } = req.params;
 
+
+    console.log("Here now", req.params)
     // Attempt to retrieve the session and populate member information
-    const session = await Session.findById(id).populate({
+    const session = await Session.findById(sessionId).populate({
       path: "members.member",
       model: "ajo_users",
       select: "username email"
