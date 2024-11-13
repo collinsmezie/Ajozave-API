@@ -15,6 +15,15 @@ const adminsRouter = require('./routes/admins')
 const passport = require('passport');
 require('./middlewares/authentication/auth')
 
+const Scheduler = require('./components/Scheduler');
+const SessionManager = require('./components/SessionManager');
+
+// Instantiate components
+const scheduler = new Scheduler();
+// const sessionManager = new SessionManager();
+
+
+
 
 const app = express();
 
@@ -56,6 +65,47 @@ app.use('/api', usersRouter, adminsRouter, sessionsRouter);
 app.get('/', (req, res) => {
   res.send('Welcome to the AjoZave API');
 });
+
+
+// Get all running jobs
+app.get('/running-jobs', (req, res) => {
+  try {
+    const jobs = scheduler.getAllJobs();
+    res.status(200).json(jobs);
+  } catch (err) {
+    res.status(500).send('Error fetching running jobs');
+  }
+});
+
+
+
+// Test endpoint to create sessions and schedule jobs
+app.post('/schedule-session', (req, res) => {
+  const { sessionId, deadline, cronExpression } = req.body;
+
+  // Create session
+  sessionManager.createSession({ sessionId, deadline });
+
+  // Schedule job for contribution deadline
+  scheduler.scheduleJob(sessionId, cronExpression, () => {
+    sessionManager.handleContributionDeadline(sessionId);
+  });
+
+  res.status(201).send(`Session ${sessionId} scheduled with cron "${cronExpression}"`);
+});
+
+// Cancel a scheduled job
+app.delete('/cancel-job/:jobId', (req, res) => {
+  const { jobId } = req.params;
+
+  try {
+    scheduler.cancelJob(jobId);
+    res.status(200).send(`Job with ID ${jobId} has been canceled.`);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
 
 // Middleware to handle errors
 app.use((err, req, res, next) => {

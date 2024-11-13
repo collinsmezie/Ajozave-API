@@ -1,177 +1,293 @@
-const User = require('../models/users');
-const Session = require('../models/sessions');
-const Admin = require('../models/admins');
-const mongoose = require('mongoose');
+// const User = require('../models/users');
+// const Session = require('../models/sessions');
+// const Admin = require('../models/admins');
+// const mongoose = require('mongoose');
 
 
 
-/// Get All Ajo Sessions
+// /// Get All Ajo Sessions
+// async function getAllSessions(req, res) {
+//   try {
+
+//     // Retrieve all sessions from the database
+//     const sessions = await Session.find();
+
+//     // If no sessions are found, return a 404 status
+//     if (sessions.length === 0) {
+//       return res.status(404).json({ message: "No sessions found" });
+//     }
+
+//     // Return the list of sessions with a 200 status code
+//     res.status(200).json({ message: "Sessions retrieved successfully", sessions });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+// /// Get Ajo Session by ID
+// async function getSessionById(req, res) {
+//   try {
+//     const { sessionId } = req.params;
+
+//     // Attempt to retrieve the session and populate member information
+//     const session = await Session.findById(sessionId).populate({
+//       path: "members.member",
+//       model: "ajo_users",
+//       select: "username email"
+//     });
+
+//     // If no session is found, return a 404 status
+//     if (!session) {
+//       return res.status(404).json({ error: "Session not found" });
+//     }
+
+//     // Return the session details with a 200 status code
+//     res.status(200).json({ message: "Session retrieved successfully", session });
+//   } catch (error) {
+//     console.error("Error fetching session by ID:", error);
+
+//     // Check if error is related to MongoDB or server issues
+//     if (error.name === "CastError" && error.kind === "ObjectId") {
+//       return res.status(400).json({ error: "Invalid session ID format" });
+//     }
+
+//     res.status(500).json({ error: "An error occurred while retrieving the session" });
+//   }
+// }
+
+
+// /// Create New Ajo Session
+// async function createSession(req, res) {
+//   try {
+
+//     // Use the current authenticated admin from the token
+//     const admin = req.user;
+
+//     if (!admin) {
+//       return res.status(400).json({ error: 'Admin not found' });
+//     }
+
+//     const session = new Session({
+//       sessionName: req.body.sessionName,
+//       contributionAmount: req.body.contributionAmount,
+//       duration: req.body.duration,
+//       numberOfMembers: req.body.numberOfMembers,
+//       startDate: req.body.startDate,
+//       endDate: req.body.endDate,
+//     });
+
+
+//     await session.save();
+//     console.log("session created")
+
+//     res.status(201).json({ message: "New session created", session });
+//   } catch (error) {
+//     console.log("Error creating session")
+
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+
+// // Add Members to Ajo Session
+// async function addMembersToSession(req, res) {
+//   try {
+//     const { id, members } = req.body;
+
+//     // Find the session by ID
+//     const session = await Session.findById(id);
+
+//     // Check if session exists
+//     if (!session) {
+//       return res.status(404).json({ error: "Session not found" });
+//     }
+
+//     // Retrieve current members
+//     const existingMemberIds = session.members.map(obj => obj.member.toString());
+//     const incomingMemberIds = members.map(memberId => memberId.toString());
+
+//     // Create a Set to combine and remove duplicates
+//     const uniqueMemberIds = new Set([...existingMemberIds, ...incomingMemberIds]);
+
+//     // Check if the combined members exceed the session capacity
+//     if (uniqueMemberIds.size > session.numberOfMembers) {
+//       return res.status(400).json({
+//         error: `Adding these members exceeds the session capacity of ${session.numberOfMembers} members set by you`,
+//       });
+//     }
+
+//     // Update session's members with unique member IDs
+//     session.members = Array.from(uniqueMemberIds).map(memberId => ({
+//       member: new mongoose.Types.ObjectId(memberId),
+//     }));
+
+//     // Save the updated session document
+//     await session.save();
+
+//     // Return the updated session
+//     res.status(200).json({
+//       message: "Members added to session successfully",
+//       session,
+//     });
+//   } catch (error) {
+//     console.error("Error adding members to session:", error);
+//     res.status(500).json({ error: "An error occurred while adding members to the session" });
+//   }
+// }
+
+
+// // Delete Member from Ajo Session
+// async function deleteMemberFromSession(req, res) {
+//   try {
+//     const { sessionId, memberId } = req.params;
+
+//     // Attempt to find the session by ID
+//     const session = await Session.findById(sessionId);
+
+//     // Check if the session exists
+//     if (!session) {
+//       return res.status(404).json({ error: "Session not found" });
+//     }
+
+//     // Filter out the member from the session's members array
+//     const memberExists = session.members.some((obj) => obj.member.toString() === memberId);
+    
+//     if (!memberExists) {
+
+//       return res.status(404).json({ error: "Member not found in session" });
+//     }
+
+//     session.members = session.members.filter((obj) => obj.member.toString() !== memberId);
+
+//     // Save the updated session document
+//     await session.save();
+
+//     // Return the updated session
+//     res.status(200).json({
+//       message: "Member removed from session successfully",
+//       session,
+//     });
+//   } catch (error) {
+//     console.error("Error removing member from session:", error);
+//     res.status(500).json({ error: "An error occurred while removing the member from the session" });
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const SessionManager = require('../components/SessionManager');
+
+
+// Controller to get all sessions for the authenticated admin
 async function getAllSessions(req, res) {
   try {
+    const adminId = req.user._id; // Admin ID from auth middleware
+    const sessionManager = new SessionManager(adminId);
+    const sessions = await sessionManager.getAllSessions();
 
-    // Retrieve all sessions from the database
-    const sessions = await Session.find();
-
-    // If no sessions are found, return a 404 status
-    if (sessions.length === 0) {
-      return res.status(404).json({ message: "No sessions found" });
-    }
-
-    // Return the list of sessions with a 200 status code
     res.status(200).json({ message: "Sessions retrieved successfully", sessions });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
 
-/// Get Ajo Session by ID
-async function getSessionById(req, res) {
-  try {
-    const { sessionId } = req.params;
-
-    // Attempt to retrieve the session and populate member information
-    const session = await Session.findById(sessionId).populate({
-      path: "members.member",
-      model: "ajo_users",
-      select: "username email"
-    });
-
-    // If no session is found, return a 404 status
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
-    }
-
-    // Return the session details with a 200 status code
-    res.status(200).json({ message: "Session retrieved successfully", session });
-  } catch (error) {
-    console.error("Error fetching session by ID:", error);
-
-    // Check if error is related to MongoDB or server issues
-    if (error.name === "CastError" && error.kind === "ObjectId") {
-      return res.status(400).json({ error: "Invalid session ID format" });
-    }
-
-    res.status(500).json({ error: "An error occurred while retrieving the session" });
-  }
-}
-
-
-/// Create New Ajo Session
+// Controller to create a new session
 async function createSession(req, res) {
   try {
+    const adminId = req.user._id; // Admin ID from auth middleware
+    const sessionManager = new SessionManager(adminId);
 
-    // Use the current authenticated admin from the token
-    const admin = req.user;
+    const sessionData = req.body; // Session details from the request
+    const newSession = await sessionManager.createSession(sessionData);
 
-    if (!admin) {
-      return res.status(400).json({ error: 'Admin not found' });
-    }
-
-    const session = new Session({
-      sessionName: req.body.sessionName,
-      contributionAmount: req.body.contributionAmount,
-      duration: req.body.duration,
-      numberOfMembers: req.body.numberOfMembers,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-    });
-
-
-    await session.save();
-    console.log("session created")
-
-    res.status(201).json({ message: "New session created", session });
+    res.status(201).json({ message: "Session created successfully", session: newSession });
   } catch (error) {
-    console.log("Error creating session")
-
     res.status(500).json({ error: error.message });
   }
 }
 
+// Get a single session by ID
+async function getSessionById(req, res) {
+  try {
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
 
-// Add Members to Ajo Session
+    const session = await sessionManager.getSessionById(req.params.sessionId);
+    res.status(200).json({ message: "Session retrieved successfully", session });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+}
+
+// Create a new session
+async function createSession(req, res) {
+  try {
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
+
+    const session = await sessionManager.createSession(req.body); // Pass session data to the manager
+    res.status(201).json({ message: "New session created", session });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Add members to a session
 async function addMembersToSession(req, res) {
   try {
-    const { id, members } = req.body;
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
 
-    // Find the session by ID
-    const session = await Session.findById(id);
-
-    // Check if session exists
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
-    }
-
-    // Retrieve current members
-    const existingMemberIds = session.members.map(obj => obj.member.toString());
-    const incomingMemberIds = members.map(memberId => memberId.toString());
-
-    // Create a Set to combine and remove duplicates
-    const uniqueMemberIds = new Set([...existingMemberIds, ...incomingMemberIds]);
-
-    // Check if the combined members exceed the session capacity
-    if (uniqueMemberIds.size > session.numberOfMembers) {
-      return res.status(400).json({
-        error: `Adding these members exceeds the session capacity of ${session.numberOfMembers} members set by you`,
-      });
-    }
-
-    // Update session's members with unique member IDs
-    session.members = Array.from(uniqueMemberIds).map(memberId => ({
-      member: new mongoose.Types.ObjectId(memberId),
-    }));
-
-    // Save the updated session document
-    await session.save();
-
-    // Return the updated session
-    res.status(200).json({
-      message: "Members added to session successfully",
-      session,
-    });
+    const session = await sessionManager.addMembersToSession(req.body.id, req.body.members); // Pass session ID and member IDs
+    res.status(200).json({ message: "Members added to session successfully", session });
   } catch (error) {
-    console.error("Error adding members to session:", error);
-    res.status(500).json({ error: "An error occurred while adding members to the session" });
+    res.status(400).json({ error: error.message });
   }
 }
 
-
-// Delete Member from Ajo Session
+// Remove a member from a session
 async function deleteMemberFromSession(req, res) {
   try {
-    const { sessionId, memberId } = req.params;
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
 
-    // Attempt to find the session by ID
-    const session = await Session.findById(sessionId);
-
-    // Check if the session exists
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
-    }
-
-    // Filter out the member from the session's members array
-    const memberExists = session.members.some((obj) => obj.member.toString() === memberId);
-    
-    if (!memberExists) {
-
-      return res.status(404).json({ error: "Member not found in session" });
-    }
-
-    session.members = session.members.filter((obj) => obj.member.toString() !== memberId);
-
-    // Save the updated session document
-    await session.save();
-
-    // Return the updated session
-    res.status(200).json({
-      message: "Member removed from session successfully",
-      session,
-    });
+    const session = await sessionManager.deleteMemberFromSession(req.params.sessionId, req.params.memberId); // Pass session ID and member ID
+    res.status(200).json({ message: "Member removed from session successfully", session });
   } catch (error) {
-    console.error("Error removing member from session:", error);
-    res.status(500).json({ error: "An error occurred while removing the member from the session" });
+    res.status(404).json({ error: error.message });
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -389,6 +505,7 @@ module.exports = {
   addMembersToSession,
   deleteMemberFromSession,
 
+  
   joinSession,
   pickTurn,
   exitSession,

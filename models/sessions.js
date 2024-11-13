@@ -57,6 +57,12 @@ const sessionSchema = new mongoose.Schema({
   endDate: {
     type: Date,
     required: true
+  },
+
+  createdBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'ajo_admins', 
+    required: true 
   }
 
 
