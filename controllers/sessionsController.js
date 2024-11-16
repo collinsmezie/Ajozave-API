@@ -270,6 +270,20 @@ async function deleteMemberFromSession(req, res) {
   }
 }
 
+// Controller to delete a session
+async function deleteSession(req, res) {
+  try {
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
+
+    const result = await sessionManager.deleteSession(req.params.sessionId); // Pass session ID
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+}
+
+
 
 
 
@@ -504,6 +518,7 @@ module.exports = {
   createSession,
   addMembersToSession,
   deleteMemberFromSession,
+  deleteSession,
 
   
   joinSession,
