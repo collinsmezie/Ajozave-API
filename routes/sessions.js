@@ -44,6 +44,7 @@ sessionsRouter.put(
   sessionsController.addMembersToSession
 );
 
+// Delete member(s) from a session
 sessionsRouter.delete(
   '/sessions/:sessionId/members/:memberId',
   passport.authenticate('jwt', { session: false }),
@@ -51,10 +52,19 @@ sessionsRouter.delete(
   sessionsController.deleteMemberFromSession
 );
 
+// Edit a session
+sessionsRouter.put(
+  '/sessions/:sessionId',
+  passport.authenticate('jwt', { session: false }),
+  // validateRequest(editSessionSchema, 'params'),
+  sessionsController.editSession
+);
+
+// Delete a Session
 sessionsRouter.delete(
   '/sessions/:sessionId',
   passport.authenticate('jwt', { session: false }),
-  // validateRequest(deleteMemberSchema, 'params'),
+  // validateRequest(deleteSessionSchema, 'params'),
   sessionsController.deleteSession
 );
 

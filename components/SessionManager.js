@@ -192,6 +192,18 @@ class SessionManager {
     return session;
   }
 
+   // Edit a session owned by this admin
+   async editSession(sessionId, updateData) {
+    const session = await Session.findOneAndUpdate(
+      { _id: sessionId, createdBy: this.adminId }, // Ensure session belongs to this admin
+      { $set: updateData }, // Update the provided fields
+      { new: true, runValidators: true } // Return the updated document and run validations
+    );
+
+    if (!session) throw new Error("Session not found or unauthorized access");
+    return session;
+  }
+
   // Delete a session owned by this admin
   async deleteSession(sessionId) {
     const session = await Session.findOneAndDelete({ 

@@ -231,19 +231,6 @@ async function getSessionById(req, res) {
   }
 }
 
-// Create a new session
-async function createSession(req, res) {
-  try {
-    const adminId = req.user._id; // Retrieve admin ID from authenticated user
-    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
-
-    const session = await sessionManager.createSession(req.body); // Pass session data to the manager
-    res.status(201).json({ message: "New session created", session });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-
 // Add members to a session
 async function addMembersToSession(req, res) {
   try {
@@ -267,6 +254,19 @@ async function deleteMemberFromSession(req, res) {
     res.status(200).json({ message: "Member removed from session successfully", session });
   } catch (error) {
     res.status(404).json({ error: error.message });
+  }
+}
+
+// Controller to edit a session
+async function editSession(req, res) {
+  try {
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
+
+    const updatedSession = await sessionManager.editSession(req.params.sessionId, req.body); // Pass session ID and update data
+    res.status(200).json({ message: "Session updated successfully", session: updatedSession });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 }
 
@@ -518,6 +518,7 @@ module.exports = {
   createSession,
   addMembersToSession,
   deleteMemberFromSession,
+  editSession,
   deleteSession,
 
   
