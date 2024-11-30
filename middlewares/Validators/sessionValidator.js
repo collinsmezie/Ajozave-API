@@ -10,8 +10,8 @@ const createSessionSchema = Joi.object({
     'number.base': 'Contribution amount must be a number.',
     'any.required': 'Contribution amount is required.',
   }),
-  duration: Joi.number().required().messages({
-    'number.base': 'Duration must be a number.',
+  duration: Joi.string().required().messages({
+    'string.base': 'Duration must be a string.',
     'any.required': 'Duration is required.',
   }),
   numberOfMembers: Joi.number().required().messages({
