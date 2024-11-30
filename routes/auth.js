@@ -41,61 +41,63 @@ authRouter.post('/admin/signup', (req, res, next) => {
 
 // Login route for admins with valid credentials using passport
 authRouter.post('/admin/login', async (req, res, next) => {
-	passport.authenticate('admin-login', async (err, user, info) => {
-		try {
-			// Handle errors or no user found
-			if (err) {
-				return res.status(500).json({ message: 'An internal error occurred.' });
-			}
+  passport.authenticate('admin-login', async (err, user, info) => {
+    try {
+      // Handle errors or no user found
+      if (err) {
+        return res.status(500).json({ message: 'An internal error occurred.' });
+      }
 
-			if (!user) {
-				// Respond with the relevant message from `passport` strategy (e.g., 'Admin not found', 'Wrong Password')
-				return res.status(401).json({ message: info.message });
-			}
-			req.login(user, { session: false }, async (error) => {
-				if (error) return next(error);
-				const body = { _id: user._id, email: user.email };
-				// const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
-				const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '1h' });
-				console.log('Signed token:', token);
+      if (!user) {
+        // Respond with the relevant message from `passport` strategy (e.g., 'Admin not found', 'Wrong Password')
+        return res.status(401).json({ message: info.message });
+      }
+      req.login(user, { session: false }, async (error) => {
+        if (error) return next(error);
+        const body = { _id: user._id, email: user.email };
+        // const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+        const token = jwt.sign({ user: body }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-				return res.json({message: info.message, token });
-			});
-		} catch (error) {
-			return next(error);
-		}
-	})(req, res, next);
+        console.log('Logged In user:', user.fullName);
+        console.log('Signed token:', token);
+
+        return res.json({ message: info.message, user: user.fullName, token });
+      });
+    } catch (error) {
+      return next(error);
+    }
+  })(req, res, next);
 });
 
 
 // User Sign Up
 authRouter.post('/user/signup', passport.authenticate('user-signup', { session: false }), async (req, res, next) => {
-	res.json({
-		message: 'User Signup successful',
-		user: req.user
-	});
+  res.json({
+    message: 'User Signup successful',
+    user: req.user
+  });
 });
 
 
 
 // Login route for users with valid credentials using passport
 authRouter.post('/user/login', async (req, res, next) => {
-	passport.authenticate('user-login', async (err, user, info) => {
-		try {
-			if (err || !user) {
-				const error = new Error('An error occurred.');
-				return next(error);
-			}
-			req.login(user, { session: false }, async (error) => {
-				if (error) return next(error);
-				const body = { _id: user._id, email: user.email };
-				const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
-				return res.json({ token });
-			});
-		} catch (error) {
-			return next(error);
-		}
-	})(req, res, next);
+  passport.authenticate('user-login', async (err, user, info) => {
+    try {
+      if (err || !user) {
+        const error = new Error('An error occurred.');
+        return next(error);
+      }
+      req.login(user, { session: false }, async (error) => {
+        if (error) return next(error);
+        const body = { _id: user._id, email: user.email };
+        const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+        return res.json({ token });
+      });
+    } catch (error) {
+      return next(error);
+    }
+  })(req, res, next);
 });
 
 
