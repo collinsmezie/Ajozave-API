@@ -61,6 +61,7 @@ const sessionSchema = new mongoose.Schema({
 
   description: {
     type: String,
+    default: null
   },
 
   createdBy: { 

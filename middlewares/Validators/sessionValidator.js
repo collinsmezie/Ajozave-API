@@ -26,10 +26,9 @@ const createSessionSchema = Joi.object({
     'date.base': 'End date must be a valid date.',
     'any.required': 'End date is required.',
   }),
-  description: Joi.string().optional().messages({
-    'string.base': 'Description must be a string.'
+  description: Joi.string().allow(null).messages({
+    'string.base': 'Description must be a string.',
   }),
-
 })
   .custom((value, helpers) => {
     if (value.startDate > value.endDate) {
