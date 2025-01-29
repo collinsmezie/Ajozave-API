@@ -59,6 +59,10 @@ const sessionSchema = new mongoose.Schema({
     required: true
   },
 
+  description: {
+    type: String,
+  },
+
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'ajo_admins', 

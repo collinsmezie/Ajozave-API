@@ -8,26 +8,26 @@ const AdminModel = require('../../models/admins');
 
 
 passport.use(
-    new JWTstrategy(
-        {
-            secretOrKey: process.env.JWT_SECRET,
-            jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-        },
-        async (token, done) => {
-            try {
-				console.log("tOKEN HERE",token)
-                // Check if the token is expired
-                if (Date.now() >= token.exp * 1000) {
-                    return done(null, false, { message: 'Token expired' });
-                }
-
-                // Token is valid, return the user
-                return done(null, token.user);
-            } catch (error) {
-                done(error);
-            }
+  new JWTstrategy(
+    {
+      secretOrKey: process.env.JWT_SECRET,
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
+    },
+    async (token, done) => {
+      try {
+        console.log("tOKEN HERE", token)
+        // Check if the token is expired
+        if (Date.now() >= token.exp * 1000) {
+          return done(null, false, { message: 'Token expired' });
         }
-    )
+
+        // Token is valid, return the user
+        return done(null, token.user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
 );
 
 
@@ -116,28 +116,28 @@ passport.use(
 
 // Admin login strategy
 passport.use(
-	'admin-login',
-	new LocalStrategy(
-		{
-			usernameField: 'email',
-			passwordField: 'password'
-		},
-		async (email, password, done) => {
-			try {
-				const admin = await AdminModel.findOne({ email });
-				if (!admin) {
-					return done(null, false, { message: 'Admin not found' });
-				}
-				const validate = await admin.isValidPassword(password);
-				if (!validate) {
-					return done(null, false, { message: 'Wrong Password' });
-				}
-				return done(null, admin, { message: 'Admin logged in Successfully' });
-			} catch (error) {
-				return done(error);
-			}
-		}
-	)
+  'admin-login',
+  new LocalStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password'
+    },
+    async (email, password, done) => {
+      try {
+        const admin = await AdminModel.findOne({ email });
+        if (!admin) {
+          return done(null, false, { message: 'Admin not found' });
+        }
+        const validate = await admin.isValidPassword(password);
+        if (!validate) {
+          return done(null, false, { message: 'Wrong Password' });
+        }
+        return done(null, admin, { message: 'Admin logged in Successfully' });
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
 );
 
 
@@ -146,52 +146,52 @@ passport.use(
 
 // User Sign Up
 passport.use(
-	'user-signup',
-	new LocalStrategy(
-		{
+  'user-signup',
+  new LocalStrategy(
+    {
 
-			usernameField: 'email',
-			passwordField: 'password',
-			passReqToCallback: true
+      usernameField: 'email',
+      passwordField: 'password',
+      passReqToCallback: true
 
-		},
-		async (req, email, password, done) => {
-			const { username } = req.body;
-			try {
-				console.log("IN PASSPORT USER SIGNUP")
-				const user = await UserModel.create({ username, email, password });
-				return done(null, user);
-			} catch (error) {
-				done(error);
-			}
-		}
-	)
+    },
+    async (req, email, password, done) => {
+      const { username } = req.body;
+      try {
+        console.log("IN PASSPORT USER SIGNUP")
+        const user = await UserModel.create({ username, email, password });
+        return done(null, user);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
 );
 
 
 
 // User login strategy
 passport.use(
-	'user-login',
-	new LocalStrategy(
-		{
-			usernameField: 'email',
-			passwordField: 'password'
-		},
-		async (email, password, done) => {
-			try {
-				const user = await UserModel.findOne({ email });
-				if (!user) {
-					return done(null, false, { message: 'User not found' });
-				}
-				const validate = await user.isValidPassword(password);
-				if (!validate) {
-					return done(null, false, { message: 'Wrong Password' });
-				}
-				return done(null, user, { message: 'User logged in Successfully' });
-			} catch (error) {
-				return done(error);
-			}
-		}
-	)
+  'user-login',
+  new LocalStrategy(
+    {
+      usernameField: 'email',
+      passwordField: 'password'
+    },
+    async (email, password, done) => {
+      try {
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+          return done(null, false, { message: 'User not found' });
+        }
+        const validate = await user.isValidPassword(password);
+        if (!validate) {
+          return done(null, false, { message: 'Wrong Password' });
+        }
+        return done(null, user, { message: 'User logged in Successfully' });
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
 );
