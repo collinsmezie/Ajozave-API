@@ -187,7 +187,7 @@
 
 
 
-const SessionManager = require('../components/SessionManager');
+const SessionManager = require('../services/SessionManager');
 
 
 // Controller to get all sessions for the authenticated admin

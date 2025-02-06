@@ -15,8 +15,8 @@ const adminsRouter = require('./routes/admins')
 const passport = require('passport');
 require('./middlewares/authentication/auth')
 
-const Scheduler = require('./components/Scheduler');
-const SessionManager = require('./components/SessionManager');
+const Scheduler = require('./services/Scheduler');
+const SessionManager = require('./services/SessionManager');
 
 // Instantiate components
 const scheduler = new Scheduler();

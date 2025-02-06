@@ -48,6 +48,10 @@ const sessionSchema = new mongoose.Schema({
     }
   ],
 
+  interestedMembers: [
+    { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  ],
+
   status: {
     type: String,
     enum: ['active', 'inactive', 'completed'],
@@ -64,16 +68,13 @@ const sessionSchema = new mongoose.Schema({
     default: null
   },
 
-  createdBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'ajo_admins', 
-    required: true 
-  }
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ajo_admins',
+    required: true
+  },
 
 
-  // interestedMembers: [
-  //     { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-  // ],
 
   // payoutRecipient: {
   //     type: mongoose.Schema.Types.ObjectId, ref: 'User',
