@@ -36,6 +36,26 @@ class SessionManager {
     return session;
   }
 
+  // Get interested members for a session owned by this admin
+  async getInterestedMembers(sessionId) {
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+      throw new Error("Invalid session ID format");
+    }
+
+    const session = await Session.findOne({
+      _id: sessionId,
+      createdBy: this.adminId
+    }).populate({
+      path: "interestedMembers",
+      model: "ajo_users",
+      select: "username email",
+    });
+
+    if (!session) throw new Error("Session not found");
+    return session.interestedMembers;
+  }
+
+
   // Create a new session for this admin
   async createSession(sessionData) {
     const session = new Session({

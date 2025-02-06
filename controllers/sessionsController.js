@@ -231,6 +231,19 @@ async function getSessionById(req, res) {
   }
 }
 
+// Controller to fetch interested members
+async function getInterestedMembers(req, res) {
+  try {
+    const adminId = req.user._id; // Retrieve admin ID from authenticated user
+    const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
+
+    const interestedMembers = await sessionManager.getInterestedMembers(req.params.sessionId);
+    res.status(200).json({ message: "Members retrieved successfully", interestedMembers });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+}
+
 // Add members to a session
 async function addMembersToSession(req, res) {
   try {
@@ -514,6 +527,7 @@ async function exitSession(req, res) {
 
 module.exports = {
   getAllSessions,
+  getInterestedMembers,
   getSessionById,
   createSession,
   addMembersToSession,

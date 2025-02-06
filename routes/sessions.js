@@ -28,6 +28,13 @@ sessionsRouter.get(
   sessionsController.getSessionById
 );
 
+// Get Interested members in a session
+sessionsRouter.get(
+  '/sessions/:sessionId/interestedMembers',
+  passport.authenticate('jwt', { session: false }),
+  sessionsController.getInterestedMembers
+);
+
 
 sessionsRouter.post(
   '/sessions/new',
