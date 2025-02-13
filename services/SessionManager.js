@@ -118,15 +118,19 @@ class SessionManager {
     // Remove the member from the session
     const [removedMember] = session.members.splice(memberIndex, 1);
 
-    console.log("See removed member", removedMember);
-
     // Add the removed member to the interestedMembers array if not already present
     if (!session.interestedMembers.some(obj => obj.toString() === memberId)) {
       session.interestedMembers.push(removedMember.member);
     }
 
     await session.save();
-    return session;
+
+    // Populate the interestedMembers array with getInterestedMembers method
+    const populatedSession = await this.getInterestedMembers(sessionId);
+
+    return populatedSession;
+
+    // return session;
   }
 
 

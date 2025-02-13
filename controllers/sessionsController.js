@@ -263,8 +263,8 @@ async function deleteMemberFromSession(req, res) {
     const adminId = req.user._id; // Retrieve admin ID from authenticated user
     const sessionManager = new SessionManager(adminId); // Create a session manager instance for the admin
 
-    const session = await sessionManager.deleteMemberFromSession(req.params.sessionId, req.params.memberId); // Pass session ID and member ID
-    res.status(200).json({ message: "Member removed from session successfully", session });
+    const response = await sessionManager.deleteMemberFromSession(req.params.sessionId, req.params.memberId); // Pass session ID and member ID
+    res.status(200).json({ message: "Member removed from session successfully", response });
   } catch (error) {
     res.status(404).json({ error: error.message });
   }
