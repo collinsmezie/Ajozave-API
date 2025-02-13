@@ -99,7 +99,12 @@ class SessionManager {
     );
 
     await session.save();
-    return session;
+    // return session;
+
+    //return only the populated version oof the members array as a response
+    const populatedSession = await this.getSessionById(sessionId);
+    return populatedSession.members;
+    
   }
 
 
