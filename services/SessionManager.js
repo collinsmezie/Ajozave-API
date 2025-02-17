@@ -13,7 +13,20 @@ class SessionManager {
   static async getAllSessions() {
     const sessions = await Session.find();
     if (!sessions.length) throw new Error("No sessions found");
-    return sessions;
+    // return sessions;
+
+    //reformat the response to include only select fields
+    const formattedSessions = sessions.map((session) => {
+      return {
+        _id: session._id,
+        title: session.sessionName,
+        description: session.description,
+        amount: session.contributionAmount,
+        members: session.numberOfMembers,
+      };
+    });
+
+    return formattedSessions;
   }
 
   // Get all sessions for this admin
