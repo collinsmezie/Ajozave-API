@@ -10,8 +10,14 @@ class SessionManager {
     this.adminId = adminId; // Store admin/collector ID
   }
 
+  static async getAllSessions() {
+    const sessions = await Session.find();
+    if (!sessions.length) throw new Error("No sessions found");
+    return sessions;
+  }
+
   // Get all sessions for this admin
-  async getAllSessions() {
+  async getAllSessionsByAdmin() {
     const sessions = await Session.find({ createdBy: this.adminId });
     if (!sessions.length) throw new Error("No sessions found for this admin");
     return sessions;

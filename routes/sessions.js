@@ -15,10 +15,18 @@ const {
 } = require('../middlewares/Validators/sessionValidator');
 
 sessionsRouter.get(
-  '/sessions',
+  '/all-sessions',
   passport.authenticate('jwt', { session: false }),
 
   sessionsController.getAllSessions
+);
+
+
+sessionsRouter.get(
+  '/collector-sessions',
+  passport.authenticate('jwt', { session: false }),
+
+  sessionsController.getAllSessionsByAdmin
 );
 
 

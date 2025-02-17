@@ -189,13 +189,24 @@
 
 const SessionManager = require('../services/SessionManager');
 
+// Controller to get all sessions
+async function getAllSessions(req, res) {
+  try {
+    const sessions = await SessionManager.getAllSessions();
+    // const sessions = await sessionManager.getAllSessions();
+
+    res.status(200).json({ message: "Sessions retrieved successfully", sessions });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 // Controller to get all sessions for the authenticated admin
-async function getAllSessions(req, res) {
+async function getAllSessionsByAdmin(req, res) {
   try {
     const adminId = req.user._id; // Admin ID from auth middleware
     const sessionManager = new SessionManager(adminId);
-    const sessions = await sessionManager.getAllSessions();
+    const sessions = await sessionManager.getAllSessionsByAdmin();
 
     res.status(200).json({ message: "Sessions retrieved successfully", sessions });
   } catch (error) {
@@ -527,6 +538,7 @@ async function exitSession(req, res) {
 
 module.exports = {
   getAllSessions,
+  getAllSessionsByAdmin,
   getInterestedMembers,
   getSessionById,
   createSession,
