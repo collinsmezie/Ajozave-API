@@ -29,6 +29,25 @@ class SessionManager {
     return formattedSessions;
   }
 
+  //Static method to get any session by ID
+  static async getAnySessionById(sessionId) {
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+      throw new Error("Invalid session ID format");
+    }
+
+    const session = await Session.findOne({
+      _id: sessionId,
+    }).populate({
+      path: "members.member",
+      model: "ajo_users",
+      select: "username email",
+    });      
+
+    if (!session) throw new Error("Session not found");
+    return session;
+  }
+
+
   // Get all sessions for this admin
   async getAllSessionsByAdmin() {
     const sessions = await Session.find({ createdBy: this.adminId });

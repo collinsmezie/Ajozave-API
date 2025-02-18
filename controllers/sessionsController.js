@@ -201,6 +201,16 @@ async function getAllSessions(req, res) {
   }
 }
 
+//Controller to get any session by ID
+async function getAnySessionById(req, res) {
+  try {
+    const session = await SessionManager.getAnySessionById(req.params.sessionId);
+    res.status(200).json({ message: "Session retrieved successfully", session });
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+}
+
 // Controller to get all sessions for the authenticated admin
 async function getAllSessionsByAdmin(req, res) {
   try {
@@ -538,6 +548,7 @@ async function exitSession(req, res) {
 
 module.exports = {
   getAllSessions,
+  getAnySessionById,
   getAllSessionsByAdmin,
   getInterestedMembers,
   getSessionById,

@@ -21,6 +21,12 @@ sessionsRouter.get(
   sessionsController.getAllSessions
 );
 
+sessionsRouter.get(
+  '/sessions/any/:sessionId',
+  passport.authenticate('jwt', { session: false }),
+
+  sessionsController.getAnySessionById
+);
 
 sessionsRouter.get(
   '/collector-sessions',
